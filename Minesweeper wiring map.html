@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minesweeper wiring map</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1d1d1b;--mut:#6b6a66;--card:#fff;--line:#dedbd3;--p5:#d1362f;--p33:#e08a12;--gnd:#555;--sig:#2f6fd1;--acc:#7a3fc7}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1a19;--fg:#ecebe6;--mut:#a3a29c;--card:#242422;--line:#3a3935;--gnd:#9a9a96;--sig:#6aa0ff;--acc:#b28cf0}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:36px 0 10px;padding-top:8px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:22px 0 6px}
+p.sub{color:var(--mut);margin:0 0 18px}
+figure{margin:12px 0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+figure svg{width:100%;height:auto;display:block}
+figcaption{color:var(--mut);font-size:13px;margin-top:8px}
+table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+tr:last-child td{border-bottom:0}
+td.ck{width:34px}input[type=checkbox]{width:17px;height:17px;accent-color:var(--sig)}
+tr.done td{opacity:.5}
+.w{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.r5{background:var(--p5)}.r33{background:var(--p33)}.rg{background:#222;border:1px solid #888}.rs{background:var(--sig)}.ra{background:var(--acc)}
+.warn{background:color-mix(in srgb,var(--p5) 10%,var(--card));border:1px solid color-mix(in srgb,var(--p5) 40%,var(--line));border-radius:8px;padding:10px 14px;margin:10px 0}
+.note{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:10px 0}
+code{font:13px ui-monospace,Menlo,monospace;background:color-mix(in srgb,var(--fg) 8%,transparent);padding:1px 4px;border-radius:4px}
+.prog{font-size:13px;color:var(--mut);margin-left:8px;font-weight:400}
+ul{padding-left:20px}li{margin:3px 0}
+</style>
+</head>
+<body><main>
+<h1>Minesweeper wiring map</h1>
+<p class="sub">Arduino Uno · ILI9341 screen · DFPlayer Mini · joystick · flag button · pulse sensor. Matches the pin map in the build spec. Tick each wire as you place it; ticks stay in your browser.</p>
+
+<div class="warn"><b>Before you start:</b> unplug the power bank and USB while wiring. Every part shares one ground. The screen's control pins must go <b>through the 74HC4050</b>, never straight from the Uno (5 V signals can damage a 3.3 V screen).</div>
+
+<h2>1. Overview</h2>
+<figure>
+<svg viewBox="0 0 1000 640" role="img" aria-label="Block diagram: the Uno sits in the middle. Screen signals pass through the 74HC4050 level shifter. DFPlayer on D2 and D3, joystick on A0, A1, D4, flag button on D5, pulse sensor on A2.">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker></defs>
+<g font-size="13" fill="currentColor" font-family="system-ui,sans-serif">
+<!-- boxes -->
+<g fill="none" stroke="currentColor" stroke-width="1.5">
+<rect x="370" y="250" width="260" height="170" rx="8"/>
+<rect x="400" y="70" width="200" height="80" rx="6"/>
+<rect x="730" y="50" width="230" height="120" rx="6"/>
+<rect x="40" y="50" width="220" height="130" rx="6"/>
+<rect x="40" y="215" width="140" height="50" rx="25"/>
+<rect x="40" y="300" width="140" height="60" rx="6"/>
+<rect x="210" y="310" width="80" height="40" rx="6"/>
+<rect x="130" y="500" width="200" height="90" rx="6"/>
+<rect x="400" y="500" width="200" height="90" rx="6"/>
+<rect x="670" y="500" width="200" height="90" rx="6"/>
+</g>
+<text x="500" y="282" text-anchor="middle" font-weight="700" font-size="16">Arduino Uno</text>
+<text x="500" y="304" text-anchor="middle" fill="var(--mut)">USB from power bank</text>
+<text x="500" y="340" text-anchor="middle">5V · 3.3V · GND</text>
+<text x="500" y="358" text-anchor="middle" fill="var(--mut)">feed the breadboard rails</text>
+<text x="500" y="395" text-anchor="middle" fill="var(--mut)">A3 left empty (random seed)</text>
+<text x="500" y="102" text-anchor="middle" font-weight="700">74HC4050</text>
+<text x="500" y="122" text-anchor="middle" fill="var(--mut)">5 V → 3.3 V shifter</text>
+<text x="500" y="139" text-anchor="middle" fill="var(--mut)">powered from 3.3 V</text>
+<text x="845" y="85" text-anchor="middle" font-weight="700">ILI9341 2.8" screen</text>
+<text x="845" y="107" text-anchor="middle" fill="var(--mut)">VCC 5V · LED 3.3V · GND</text>
+<text x="845" y="127" text-anchor="middle" fill="var(--mut)">touch + SD pins unused</text>
+<text x="150" y="85" text-anchor="middle" font-weight="700">DFPlayer Mini</text>
+<text x="150" y="107" text-anchor="middle" fill="var(--mut)">VCC 5V · GND</text>
+<text x="150" y="127" text-anchor="middle" fill="var(--mut)">470 µF across VCC/GND</text>
+<text x="150" y="147" text-anchor="middle" fill="var(--mut)">microSD: /mp3/0001–0005</text>
+<text x="110" y="245" text-anchor="middle" font-weight="700">8 Ω speaker</text>
+<text x="110" y="327" text-anchor="middle" font-weight="700">Power bank</text>
+<text x="110" y="346" text-anchor="middle" fill="var(--mut)">USB out</text>
+<text x="250" y="335" text-anchor="middle" font-weight="700">Switch</text>
+<text x="230" y="530" text-anchor="middle" font-weight="700">Joystick</text>
+<text x="230" y="552" text-anchor="middle" fill="var(--mut)">+5V · GND</text>
+<text x="500" y="530" text-anchor="middle" font-weight="700">Flag button</text>
+<text x="500" y="552" text-anchor="middle" fill="var(--mut)">other leg → GND</text>
+<text x="770" y="530" text-anchor="middle" font-weight="700">Pulse sensor</text>
+<text x="770" y="552" text-anchor="middle" fill="var(--mut)">+ 5V · − GND</text>
+<text x="770" y="572" text-anchor="middle" fill="var(--mut)">face-up finger pad</text>
+<!-- wires -->
+<g stroke="var(--sig)" stroke-width="2.5" fill="none">
+<line x1="500" y1="250" x2="500" y2="154" marker-end="url(#ar)" color="var(--sig)"/>
+<line x1="600" y1="110" x2="726" y2="110" marker-end="url(#ar)" color="var(--sig)"/>
+<polyline points="634,300 690,300 690,150 730,150" marker-start="url(#ar)" stroke-dasharray="6 4" color="var(--sig)"/>
+<polyline points="370,290 340,290 340,120 264,120" marker-start="url(#ar)" color="var(--sig)"/>
+<polyline points="370,320 320,320 320,160 264,160" marker-end="url(#ar)" color="var(--sig)"/>
+<line x1="110" y1="180" x2="110" y2="211" marker-end="url(#ar)" color="var(--sig)"/>
+<polyline points="380,420 380,460 230,460 230,496" marker-start="url(#ar)" color="var(--sig)"/>
+<line x1="500" y1="420" x2="500" y2="496" marker-start="url(#ar)" color="var(--sig)"/>
+<polyline points="620,420 620,460 770,460 770,496" marker-start="url(#ar)" color="var(--sig)"/>
+</g>
+<g stroke="var(--p5)" stroke-width="2.5" fill="none">
+<line x1="180" y1="330" x2="210" y2="330"/><line x1="290" y1="330" x2="366" y2="330" marker-end="url(#ar)" color="var(--p5)"/>
+</g>
+<!-- wire labels -->
+<text x="510" y="190" fill="var(--sig)">D13 D11 D10 D9 D8</text>
+<text x="510" y="208" fill="var(--sig)">(5 V logic in)</text>
+<text x="606" y="100" fill="var(--sig)">SCK MOSI CS</text>
+<text x="606" y="128" fill="var(--sig)">DC RST (3.3 V)</text>
+<text x="698" y="230" fill="var(--sig)">D12 ← SDO</text>
+<text x="698" y="248" fill="var(--sig)">(direct, optional)</text>
+<text x="272" y="110" fill="var(--sig)">TX → D2</text>
+<text x="200" y="215" fill="var(--sig)">D3 → 1 kΩ → RX</text>
+<text x="120" y="200" fill="var(--sig)">SPK</text>
+<text x="300" y="350" fill="var(--p5)">USB</text>
+<text x="240" y="478" fill="var(--sig)">VRx→A0 · VRy→A1 · SW→D4</text>
+<text x="510" y="478" fill="var(--sig)">D5</text>
+<text x="640" y="478" fill="var(--sig)">S → A2</text>
+</g>
+</svg>
+<figcaption>Blue arrows are signal wires; the arrowhead points the way the signal travels. Power and ground for each part come from the breadboard rails, listed in section 2. The dashed line is the screen's data-out, which can go straight to the Uno.</figcaption>
+</figure>
+
+<h2>2. Power rails <span class="prog" data-g="pw"></span></h2>
+<p>Set up one breadboard with three rails. Do this first; every other part plugs into them.</p>
+<table data-g="pw"><tr><th></th><th>From</th><th>To</th><th>Notes</th></tr>
+<tr><td class="ck"><input type="checkbox"></td><td><span class="w r5"></span>Uno <b>5V</b></td><td>Breadboard <b>5V rail</b> (+)</td><td>Red wire</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td><span class="w r33"></span>Uno <b>3.3V</b></td><td>Breadboard <b>3.3V rail</b> (second + rail)</td><td>Orange wire. Label this rail so nobody mixes it up with 5V.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td><span class="w rg"></span>Uno <b>GND</b></td><td>Both − rails</td><td>Jumper the two − rails together.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Power bank USB</td><td>Switch → USB cable → Uno USB port</td><td>Use the Uno's USB port, not VIN.</td></tr>
+</table>
+
+<h2>3. Screen and 74HC4050 <span class="prog" data-g="tft"></span></h2>
+<figure>
+<svg viewBox="0 0 760 345" role="img" aria-label="74HC4050 pinout with connections: each Uno pin goes into an A input, and the matching Y output goes to the screen."><g font-size="13" font-family="system-ui,sans-serif" fill="currentColor"><rect x="300" y="20" width="160" height="285" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M365,20 a15,15 0 0 0 30,0" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="345" cy="30" r="4"/><text x="380" y="330" text-anchor="middle" font-weight="700">74HC4050 (top view, notch up)</text><text x="312" y="49">1 VCC</text><line x1="290" y1="45" x2="160" y2="45" stroke="var(--p33)" stroke-width="2.5"/><text x="150" y="49" text-anchor="end" fill="var(--p33)">3.3V rail</text><text x="312" y="83">2 1Y</text><line x1="290" y1="79" x2="160" y2="79" stroke="var(--acc)" stroke-width="2.5"/><text x="150" y="83" text-anchor="end" fill="var(--acc)">screen SCK</text><text x="312" y="117">3 1A</text><line x1="290" y1="113" x2="160" y2="113" stroke="var(--sig)" stroke-width="2.5"/><text x="150" y="117" text-anchor="end" fill="var(--sig)">Uno D13</text><text x="312" y="151">4 2Y</text><line x1="290" y1="147" x2="160" y2="147" stroke="var(--acc)" stroke-width="2.5"/><text x="150" y="151" text-anchor="end" fill="var(--acc)">screen SDI (MOSI)</text><text x="312" y="185">5 2A</text><line x1="290" y1="181" x2="160" y2="181" stroke="var(--sig)" stroke-width="2.5"/><text x="150" y="185" text-anchor="end" fill="var(--sig)">Uno D11</text><text x="312" y="219">6 3Y</text><line x1="290" y1="215" x2="160" y2="215" stroke="var(--acc)" stroke-width="2.5"/><text x="150" y="219" text-anchor="end" fill="var(--acc)">screen CS</text><text x="312" y="253">7 3A</text><line x1="290" y1="249" x2="160" y2="249" stroke="var(--sig)" stroke-width="2.5"/><text x="150" y="253" text-anchor="end" fill="var(--sig)">Uno D10</text><text x="312" y="287">8 GND</text><line x1="290" y1="283" x2="160" y2="283" stroke="var(--gnd)" stroke-width="2.5"/><text x="150" y="287" text-anchor="end" fill="var(--gnd)">GND rail</text><text x="448" y="49" text-anchor="end">NC 16</text><text x="448" y="83" text-anchor="end">6Y 15</text><text x="448" y="117" text-anchor="end">6A 14</text><line x1="470" y1="113" x2="600" y2="113" stroke="var(--gnd)" stroke-width="2.5"/><text x="610" y="117" fill="var(--gnd)">GND (unused input)</text><text x="448" y="151" text-anchor="end">NC 13</text><text x="448" y="185" text-anchor="end">5Y 12</text><line x1="470" y1="181" x2="600" y2="181" stroke="var(--acc)" stroke-width="2.5"/><text x="610" y="185" fill="var(--acc)">screen RESET</text><text x="448" y="219" text-anchor="end">5A 11</text><line x1="470" y1="215" x2="600" y2="215" stroke="var(--sig)" stroke-width="2.5"/><text x="610" y="219" fill="var(--sig)">Uno D8</text><text x="448" y="253" text-anchor="end">4Y 10</text><line x1="470" y1="249" x2="600" y2="249" stroke="var(--acc)" stroke-width="2.5"/><text x="610" y="253" fill="var(--acc)">screen DC</text><text x="448" y="287" text-anchor="end">4A 9</text><line x1="470" y1="283" x2="600" y2="283" stroke="var(--sig)" stroke-width="2.5"/><text x="610" y="287" fill="var(--sig)">Uno D9</text><text x="610" y="49" fill="var(--mut)">16, 15, 13: leave empty</text></g></svg>
+<figcaption>Each Uno pin goes into an <b>A</b> input (blue), and the matching <b>Y</b> output right next to it goes to the screen (purple). Pin 1 is at the top left, next to the dot / left of the notch.</figcaption>
+</figure>
+<table data-g="tft"><tr><th></th><th>Screen pin</th><th>Goes to</th><th>Notes</th></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>74HC4050 pin 1 (VCC)</td><td><span class="w r33"></span>3.3V rail</td><td>Must be 3.3 V. This sets the output level.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>74HC4050 pin 8 (GND)</td><td><span class="w rg"></span>GND rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>74HC4050 pin 14 (6A)</td><td><span class="w rg"></span>GND rail</td><td>Unused input, tie low so it doesn't float.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>SCK</b></td><td>4050 pin 2 ← pin 3 ← <b>Uno D13</b></td><td>SPI clock</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>SDI (MOSI)</b></td><td>4050 pin 4 ← pin 5 ← <b>Uno D11</b></td><td>Data to screen</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>CS</b></td><td>4050 pin 6 ← pin 7 ← <b>Uno D10</b></td><td>Chip select</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>DC</b> (or D/C, RS)</td><td>4050 pin 10 ← pin 9 ← <b>Uno D9</b></td><td>Data / command</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>RESET</b></td><td>4050 pin 12 ← pin 11 ← <b>Uno D8</b></td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>SDO (MISO)</b></td><td><b>Uno D12</b>, direct</td><td>Optional. Screen → Uno only, so no shifter needed. The game never reads the screen.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>VCC</b></td><td><span class="w r5"></span>5V rail</td><td>The red 2.8" boards have a 3.3 V regulator on board. If yours has jumper <b>J1</b> soldered shut, use the 3.3V rail instead.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>LED</b></td><td><span class="w r33"></span>3.3V rail</td><td>Backlight</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>GND</b></td><td><span class="w rg"></span>GND rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>T_CLK, T_CS, T_DIN, T_DO, T_IRQ, SD_*</td><td>Nothing</td><td>Touch and SD card on the screen are not used.</td></tr>
+</table>
+
+<h2>4. DFPlayer Mini and speaker <span class="prog" data-g="df"></span></h2>
+<div class="note">With the microSD slot facing up and away from you, the left column is pins 1–8 from top: <b>VCC, RX, TX, DAC_R, DAC_L, SPK_1, GND, SPK_2</b>. Check against the labels on your board.</div>
+<table data-g="df"><tr><th></th><th>DFPlayer pin</th><th>Goes to</th><th>Notes</th></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>1 <b>VCC</b></td><td><span class="w r5"></span>5V rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>7 <b>GND</b></td><td><span class="w rg"></span>GND rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>470 µF capacitor</td><td>Long leg (+) → VCC, striped leg (−) → GND</td><td>Right next to the module. Backwards electrolytic caps can pop.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>3 <b>TX</b></td><td><span class="w rs"></span><b>Uno D2</b></td><td>Direct wire</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>2 <b>RX</b></td><td><span class="w rs"></span>1 kΩ resistor → <b>Uno D3</b></td><td>Resistor in series (brown-black-red). Cuts noise and protects the module's 3.3 V input.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>6 <b>SPK_1</b></td><td>Speaker +</td><td>Speaker goes straight to the module, never to GND.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>8 <b>SPK_2</b></td><td>Speaker −</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>microSD card</td><td>FAT32, folder <code>/mp3/</code>, files <code>0001.mp3</code> to <code>0005.mp3</code></td><td>Reveal, flag, explosion, lose, win</td></tr>
+</table>
+
+<h2>5. Controls and pulse sensor <span class="prog" data-g="in"></span></h2>
+<table data-g="in"><tr><th></th><th>Part pin</th><th>Goes to</th><th>Notes</th></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Joystick <b>GND</b></td><td><span class="w rg"></span>GND rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Joystick <b>+5V</b></td><td><span class="w r5"></span>5V rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Joystick <b>VRx</b></td><td><span class="w rs"></span><b>Uno A0</b></td><td>If left/right feel swapped later, fix it in <code>config.h</code>, not the wires.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Joystick <b>VRy</b></td><td><span class="w rs"></span><b>Uno A1</b></td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Joystick <b>SW</b></td><td><span class="w rs"></span><b>Uno D4</b></td><td>No resistor; the code turns on the Uno's internal pull-up.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Flag button, leg 1</td><td><span class="w rs"></span><b>Uno D5</b></td><td>On a 4-leg button use two <b>diagonal</b> legs so the button actually switches.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Flag button, diagonal leg</td><td><span class="w rg"></span>GND rail</td><td>Internal pull-up again, no resistor.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Pulse sensor <b>+</b></td><td><span class="w r5"></span>5V rail</td><td>Go by the +, −, S marks on the board, not wire colors.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Pulse sensor <b>−</b></td><td><span class="w rg"></span>GND rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Pulse sensor <b>S</b></td><td><span class="w rs"></span><b>Uno A2</b></td><td>Mount face-up. Cover the back with tape so it doesn't short on anything.</td></tr>
+</table>
+
+<h2>6. Uno pin summary</h2>
+<table>
+<tr><th>Uno pin</th><th>Connects to</th><th>Uno pin</th><th>Connects to</th></tr>
+<tr><td>D2</td><td>DFPlayer TX</td><td>D11</td><td>4050 pin 5 → screen SDI</td></tr>
+<tr><td>D3</td><td>1 kΩ → DFPlayer RX</td><td>D12</td><td>Screen SDO (direct, optional)</td></tr>
+<tr><td>D4</td><td>Joystick SW</td><td>D13</td><td>4050 pin 3 → screen SCK</td></tr>
+<tr><td>D5</td><td>Flag button</td><td>A0 / A1</td><td>Joystick VRx / VRy</td></tr>
+<tr><td>D8</td><td>4050 pin 11 → screen RESET</td><td>A2</td><td>Pulse sensor S</td></tr>
+<tr><td>D9</td><td>4050 pin 9 → screen DC</td><td>A3</td><td><b>Leave empty</b> (random seed)</td></tr>
+<tr><td>D10</td><td>4050 pin 7 → screen CS</td><td>Free</td><td>D6, D7, A4, A5</td></tr>
+</table>
+
+<h2>7. Check before powering on</h2>
+<ul>
+<li>Nothing from the 5V rail touches the 3.3V rail. Check with a multimeter (continuity mode) between the two rails: it must <b>not</b> beep.</li>
+<li>No continuity between 5V and GND, or 3.3V and GND.</li>
+<li>74HC4050 notch faces the right way and pin 1 is on 3.3 V.</li>
+<li>470 µF cap stripe goes to GND.</li>
+<li>First power-up: USB from the laptop, not the power bank, so you can watch Serial Monitor. Wire and test one part at a time in the same order as the build spec (screen, controls, audio, pulse).</li>
+</ul>
+</main>
+<script>
+(function(){
+  var KEY='msw-wiring-v1',st={};
+  try{st=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  function upd(){document.querySelectorAll('table[data-g]').forEach(function(t){
+    var g=t.dataset.g,b=t.querySelectorAll('input'),n=0;b.forEach(function(x){if(x.checked)n++});
+    var s=document.querySelector('span.prog[data-g="'+g+'"]');if(s)s.textContent=n+' / '+b.length+' done';})}
+  document.querySelectorAll('table[data-g]').forEach(function(t){
+    t.querySelectorAll('input').forEach(function(x,i){
+      var id=t.dataset.g+i;x.checked=!!st[id];x.closest('tr').classList.toggle('done',x.checked);
+      x.addEventListener('change',function(){st[id]=x.checked;x.closest('tr').classList.toggle('done',x.checked);
+        try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}upd();});
+    });});
+  upd();
+})();
+</script>
+</body></html>
