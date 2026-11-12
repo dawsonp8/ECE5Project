@@ -4,3 +4,10 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+
+# Local AI agent config (not shared with the team)
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+docs/agents/
+.scratch/
