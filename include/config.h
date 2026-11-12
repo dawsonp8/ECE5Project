@@ -45,6 +45,10 @@
 #define TRK_WIN 5
 #define EXPLOSION_SOUND_MS 1500UL
 
+// Explosion animation: frames x frame time ~ EXPLOSION_SOUND_MS
+#define EXPLOSION_FRAMES 8
+#define EXPLOSION_FRAME_MS 190UL
+
 // Input
 #define JOY_DEADZONE 200
 #define JOY_REPEAT_DELAY_MS 350
