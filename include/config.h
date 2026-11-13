@@ -30,6 +30,7 @@
 #define IBI_MIN_MS 300
 #define IBI_MAX_MS 1500
 #define HR_LOST_MS 3000UL
+#define HR_MIN_BEATS 3  // good beats needed before a BPM average counts as valid
 #define PULSE_THRESHOLD 550
 #define T_MAX_MS 10000L
 #define T_MIN_MS 3000L
@@ -37,7 +38,8 @@
 #define FIXED_MOVE_MS 8000L
 
 // Audio
-#define DF_VOLUME 20
+#define DF_VOLUME 20          // 0-30; keep 18-22 while the DFPlayer runs off the Uno's 5 V
+#define AUDIO_MIN_GAP_MS 60UL // drop non-critical sounds sent closer together than this
 #define TRK_REVEAL 1
 #define TRK_FLAG 2
 #define TRK_EXPLODE 3
