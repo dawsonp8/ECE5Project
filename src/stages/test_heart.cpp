@@ -3,6 +3,10 @@
 // Needs: pulse sensor + -> 5V, - -> GND, S -> A2, mounted face-up. The screen
 // is used if connected. Serial at 115200.
 //
+// With HR_SOURCE_BLE 1 in config.h it reads a Garmin watch through the ESP32
+// bridge instead (bridge TX -> D0, shared GND, watch broadcasting heart rate).
+// Calibration then counts watch readings (~1/s), and plotter mode shows BPM.
+//
 // At power-on it runs the 15 s calibration (rest a finger on the sensor), then
 // shows the result. After that, every 500 ms it prints BPM, validity, resting
 // BPM, and the move time T_ms the game would give; the timer bar on screen
@@ -80,7 +84,7 @@ void loop() {
     Serial.print(ok ? F("Calibration OK: ") : F("Calibration FAILED: "));
     Serial.print(heartCalBeats());
     Serial.print(F(" beats (need "));
-    Serial.print(CAL_MIN_BEATS);
+    Serial.print(HEART_CAL_MIN);
     Serial.print(F("), resting BPM = "));
     Serial.println(heartRestBpm());
     if (ok) {
@@ -97,8 +101,12 @@ void loop() {
       Serial.print(heartRawSignal());
       Serial.print(F(",bpm:"));
       Serial.print(heartBpm() < 0 ? 0 : heartBpm());
+#if HR_SOURCE_BLE
+      Serial.println();
+#else
       Serial.print(F(",threshold:"));
       Serial.println(PULSE_THRESHOLD);
+#endif
     }
     return;
   }

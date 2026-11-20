@@ -1,10 +1,23 @@
-// Pulse sensor wrapper: beat detection, calibration, 8-beat average, and the
-// move-time formula (spec section 7).
+// Heart-rate wrapper: calibration and the move-time formula (spec section 7),
+// fed by one of two sources chosen with HR_SOURCE_BLE in config.h:
+//   0: analog pulse sensor, beat detection, 8-beat average.
+//   1: Garmin watch BPM from the ESP32 bridge on Serial (D0). "Beats" below
+//      then means watch readings (about one per second).
 #ifndef HEART_H
 #define HEART_H
 
 #include <stdint.h>
 
+#include "config.h"
+
+// Beats (or watch readings) a calibration window needs to succeed.
+#if HR_SOURCE_BLE
+#define HEART_CAL_MIN BLE_CAL_MIN_READINGS
+#else
+#define HEART_CAL_MIN CAL_MIN_BEATS
+#endif
+
+// In BLE mode this (re)starts Serial at HR_SERIAL_BAUD.
 void heartInit();
 
 // Call every loop(): collects new beats, drops stale ones, runs calibration.
@@ -25,7 +38,7 @@ bool heartCalibrating();
 uint16_t heartCalProgress();  // 0..1000 of the window
 uint8_t heartCalBeats();      // good beats so far in this window
 
-// After the window ends: true if at least CAL_MIN_BEATS good beats were seen.
+// After the window ends: true if at least HEART_CAL_MIN good beats were seen.
 // On success BPM_rest is updated; on failure the old value is kept.
 bool heartCalSucceeded();
 
@@ -44,6 +57,7 @@ bool heartUsingFallback();
 uint32_t heartMoveTimeMs();
 
 // Latest raw sensor sample (0-1023), for the test sketch's plotter output.
+// In BLE mode: the latest watch BPM (0 if none).
 int16_t heartRawSignal();
 
 #endif

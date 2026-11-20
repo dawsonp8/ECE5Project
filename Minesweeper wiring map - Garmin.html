@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minesweeper wiring map: Garmin heart-rate version</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1d1d1b;--mut:#6b6a66;--card:#fff;--line:#dedbd3;--p5:#d1362f;--p33:#e08a12;--gnd:#555;--sig:#2f6fd1;--acc:#7a3fc7;--new:#1f8f4e;--old:#b23a3a}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1a19;--fg:#ecebe6;--mut:#a3a29c;--card:#242422;--line:#3a3935;--gnd:#9a9a96;--sig:#6aa0ff;--acc:#b28cf0;--new:#4cc983;--old:#f07a7a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:36px 0 10px;padding-top:8px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:22px 0 6px}
+p.sub{color:var(--mut);margin:0 0 18px}
+figure{margin:12px 0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+figure svg{width:100%;height:auto;display:block}
+figcaption{color:var(--mut);font-size:13px;margin-top:8px}
+table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+tr:last-child td{border-bottom:0}
+td.ck{width:34px}input[type=checkbox]{width:17px;height:17px;accent-color:var(--sig)}
+tr.done td{opacity:.5}
+tr.chg-new td{background:color-mix(in srgb,var(--new) 12%,var(--card))}
+tr.chg-old td{background:color-mix(in srgb,var(--old) 10%,var(--card))}
+tr.chg-old td:not(.ck){text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--old) 60%,transparent)}
+tr.chg-old td .keep{text-decoration:none;display:inline-block}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;padding:1px 6px;border-radius:4px;margin-right:6px;vertical-align:1px;text-decoration:none}
+.t-new{background:var(--new);color:#fff}.t-old{background:var(--old);color:#fff}.t-same{background:color-mix(in srgb,var(--fg) 14%,transparent);color:var(--fg)}
+.w{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.r5{background:var(--p5)}.r33{background:var(--p33)}.rg{background:#222;border:1px solid #888}.rs{background:var(--sig)}.ra{background:var(--acc)}.rn{background:var(--new)}
+.warn{background:color-mix(in srgb,var(--p5) 10%,var(--card));border:1px solid color-mix(in srgb,var(--p5) 40%,var(--line));border-radius:8px;padding:10px 14px;margin:10px 0}
+.note{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:10px 0}
+.chgbox{background:color-mix(in srgb,var(--new) 9%,var(--card));border:1px solid color-mix(in srgb,var(--new) 45%,var(--line));border-radius:10px;padding:12px 16px;margin:12px 0}
+.chgbox ol{margin:6px 0 2px;padding-left:22px}.chgbox li{margin:6px 0}
+code{font:13px ui-monospace,Menlo,monospace;background:color-mix(in srgb,var(--fg) 8%,transparent);padding:1px 4px;border-radius:4px}
+.prog{font-size:13px;color:var(--mut);margin-left:8px;font-weight:400}
+ul{padding-left:20px}li{margin:3px 0}
+</style>
+</head>
+<body><main>
+<h1>Minesweeper wiring map: Garmin heart-rate version</h1>
+<p class="sub">Arduino Uno · ILI9341 screen through a 74VHC86 · DFPlayer Mini · joystick · flag button · <b>Garmin Forerunner 265S → ESP32 bridge</b>. Starts from the current breadboard (74VHC86 screen shifting + analog pulse sensor) and marks every change. Use with <code>HR_SOURCE_BLE 1</code> in <code>config.h</code>. Tick each wire as you place it; ticks stay in your browser.</p>
+
+<div class="chgbox">
+<b>What changes from the current breadboard</b> (<span class="tag t-new">NEW</span> add, <span class="tag t-old">REMOVE</span> take out, everything else stays):
+<ol>
+<li><span class="tag t-new">NEW</span><b>ESP32 DevKit V1</b>, powered from its <b>own USB cable</b>.</li>
+<li><span class="tag t-new">NEW</span>ESP32 <b>GND → Uno GND rail</b>. Required: the serial signal needs a shared ground.</li>
+<li><span class="tag t-new">NEW</span>ESP32 <b>GPIO17 (TX2) → Uno D0 (RX)</b>. One wire, no resistor or shifter. <b>Unplug it from D0 every time you upload to the Uno.</b></li>
+<li><span class="tag t-old">REMOVE</span><b>Pulse sensor</b> (+, −, S → A2). Optional: in Garmin mode it is ignored, so you can leave it in to switch back with <code>HR_SOURCE_BLE 0</code>.</li>
+<li><b>No change</b> to the screen, 74VHC86, RESET divider, DFPlayer, joystick or flag button.</li>
+</ol>
+</div>
+
+<div class="warn"><b>Before you start:</b> unplug the power bank and USB while wiring. Every part shares one ground, including the ESP32. Never connect the ESP32's 3.3V or 5V/VIN pin to the Uno's rails while both boards are on USB.</div>
+
+<h2>1. Overview</h2>
+<figure>
+<svg viewBox="0 0 1000 680" role="img" aria-label="Block diagram: the Uno sits in the middle. Screen signals pass through the 74VHC86; RESET uses a resistor divider. DFPlayer on D2 and D3, joystick on A0, A1, D4, flag button on D5. New: a Garmin watch sends heart rate over Bluetooth to an ESP32, whose GPIO17 goes to Uno D0. The pulse sensor on A2 is crossed out as optional.">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker></defs>
+<g font-size="13" fill="currentColor" font-family="system-ui,sans-serif">
+<g fill="none" stroke="currentColor" stroke-width="1.5">
+<rect x="370" y="250" width="260" height="170" rx="8"/>
+<rect x="400" y="60" width="200" height="90" rx="6"/>
+<rect x="730" y="50" width="230" height="120" rx="6"/>
+<rect x="40" y="50" width="220" height="130" rx="6"/>
+<rect x="40" y="215" width="140" height="50" rx="25"/>
+<rect x="40" y="300" width="140" height="60" rx="6"/>
+<rect x="210" y="310" width="80" height="40" rx="6"/>
+<rect x="60" y="500" width="180" height="90" rx="6"/>
+<rect x="280" y="500" width="160" height="90" rx="6"/>
+</g>
+<!-- old pulse sensor, crossed out -->
+<g stroke="var(--old)" stroke-width="1.5" fill="none" stroke-dasharray="5 4">
+<rect x="480" y="560" width="170" height="80" rx="6"/>
+</g>
+<line x1="480" y1="560" x2="650" y2="640" stroke="var(--old)" stroke-width="1.5"/>
+<line x1="650" y1="560" x2="480" y2="640" stroke="var(--old)" stroke-width="1.5"/>
+<text x="565" y="590" text-anchor="middle" font-weight="700" fill="var(--old)">Pulse sensor</text>
+<text x="565" y="610" text-anchor="middle" fill="var(--old)">optional, ignored</text>
+<text x="565" y="628" text-anchor="middle" fill="var(--old)">S → A2</text>
+<!-- new parts -->
+<g stroke="var(--new)" stroke-width="2.5" fill="none">
+<rect x="700" y="470" width="260" height="110" rx="8"/>
+<rect x="760" y="300" width="200" height="80" rx="40"/>
+</g>
+<text x="830" y="498" text-anchor="middle" font-weight="700" fill="var(--new)">NEW: ESP32 DevKit V1</text>
+<text x="830" y="520" text-anchor="middle" fill="var(--mut)">own USB cable for power</text>
+<text x="830" y="540" text-anchor="middle" fill="var(--mut)">GND → Uno GND rail</text>
+<text x="830" y="560" text-anchor="middle" fill="var(--mut)">esp32_hr_bridge.cpp</text>
+<text x="860" y="333" text-anchor="middle" font-weight="700" fill="var(--new)">Garmin FR 265S</text>
+<text x="860" y="353" text-anchor="middle" fill="var(--mut)">Broadcast Heart Rate</text>
+<!-- labels -->
+<text x="500" y="282" text-anchor="middle" font-weight="700" font-size="16">Arduino Uno</text>
+<text x="500" y="304" text-anchor="middle" fill="var(--mut)">USB from power bank</text>
+<text x="500" y="340" text-anchor="middle">5V · 3.3V · GND</text>
+<text x="500" y="358" text-anchor="middle" fill="var(--mut)">feed the breadboard rails</text>
+<text x="500" y="395" text-anchor="middle" fill="var(--mut)">A3 left empty (random seed)</text>
+<text x="500" y="88" text-anchor="middle" font-weight="700">74VHC86</text>
+<text x="500" y="108" text-anchor="middle" fill="var(--mut)">4 XOR gates as buffers</text>
+<text x="500" y="125" text-anchor="middle" fill="var(--mut)">VCC 3.3 V, B inputs → GND</text>
+<text x="500" y="142" text-anchor="middle" fill="var(--mut)">RESET: 1k/2k divider</text>
+<text x="845" y="85" text-anchor="middle" font-weight="700">ILI9341 2.8" screen</text>
+<text x="845" y="107" text-anchor="middle" fill="var(--mut)">VCC 5V · LED 3.3V · GND</text>
+<text x="845" y="127" text-anchor="middle" fill="var(--mut)">touch + SD pins unused</text>
+<text x="150" y="85" text-anchor="middle" font-weight="700">DFPlayer Mini</text>
+<text x="150" y="107" text-anchor="middle" fill="var(--mut)">VCC 5V · GND</text>
+<text x="150" y="127" text-anchor="middle" fill="var(--mut)">470 µF across VCC/GND</text>
+<text x="150" y="147" text-anchor="middle" fill="var(--mut)">microSD: /mp3/0001–0005</text>
+<text x="110" y="245" text-anchor="middle" font-weight="700">8 Ω speaker</text>
+<text x="110" y="327" text-anchor="middle" font-weight="700">Power bank</text>
+<text x="110" y="346" text-anchor="middle" fill="var(--mut)">USB out</text>
+<text x="250" y="335" text-anchor="middle" font-weight="700">Switch</text>
+<text x="150" y="530" text-anchor="middle" font-weight="700">Joystick</text>
+<text x="150" y="552" text-anchor="middle" fill="var(--mut)">+5V · GND</text>
+<text x="360" y="530" text-anchor="middle" font-weight="700">Flag button</text>
+<text x="360" y="552" text-anchor="middle" fill="var(--mut)">other leg → GND</text>
+<!-- wires -->
+<g stroke="var(--sig)" stroke-width="2.5" fill="none">
+<line x1="500" y1="250" x2="500" y2="154" marker-end="url(#ar)" color="var(--sig)"/>
+<line x1="600" y1="110" x2="726" y2="110" marker-end="url(#ar)" color="var(--sig)"/>
+<polyline points="634,280 690,280 690,150 730,150" marker-start="url(#ar)" stroke-dasharray="6 4" color="var(--sig)"/>
+<polyline points="370,290 340,290 340,120 264,120" marker-start="url(#ar)" color="var(--sig)"/>
+<polyline points="370,320 320,320 320,160 264,160" marker-end="url(#ar)" color="var(--sig)"/>
+<line x1="110" y1="180" x2="110" y2="211" marker-end="url(#ar)" color="var(--sig)"/>
+<polyline points="390,420 390,460 150,460 150,496" marker-start="url(#ar)" color="var(--sig)"/>
+<polyline points="440,420 440,450 360,450 360,496" marker-start="url(#ar)" color="var(--sig)"/>
+</g>
+<polyline points="560,420 560,556" stroke="var(--old)" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+<g stroke="var(--new)" stroke-width="3" fill="none">
+<polyline points="700,520 660,520 660,400 634,400" marker-end="url(#ar)" color="var(--new)"/>
+<line x1="860" y1="380" x2="860" y2="466" stroke-dasharray="3 5" marker-end="url(#ar)" color="var(--new)"/>
+</g>
+<g stroke="var(--p5)" stroke-width="2.5" fill="none">
+<line x1="180" y1="330" x2="210" y2="330"/><line x1="290" y1="330" x2="366" y2="330" marker-end="url(#ar)" color="var(--p5)"/>
+</g>
+<text x="510" y="190" fill="var(--sig)">D13 D11 D10 D9 D8</text>
+<text x="510" y="208" fill="var(--sig)">(5 V logic in)</text>
+<text x="606" y="100" fill="var(--sig)">SCK SDI CS</text>
+<text x="606" y="128" fill="var(--sig)">DC RST (3.3 V)</text>
+<text x="698" y="215" fill="var(--sig)">D12 ← SDO</text>
+<text x="698" y="233" fill="var(--sig)">(direct)</text>
+<text x="272" y="110" fill="var(--sig)">TX → D2</text>
+<text x="200" y="215" fill="var(--sig)">D3 → 1 kΩ → RX</text>
+<text x="120" y="200" fill="var(--sig)">SPK</text>
+<text x="300" y="350" fill="var(--p5)">USB</text>
+<text x="160" y="478" fill="var(--sig)">VRx→A0 · VRy→A1 · SW→D4</text>
+<text x="368" y="478" fill="var(--sig)">D5</text>
+<text x="666" y="445" fill="var(--new)" font-weight="700">GPIO17 → D0</text>
+<text x="872" y="420" fill="var(--new)">Bluetooth</text>
+<text x="872" y="438" fill="var(--new)">"HR 72"</text>
+</g>
+</svg>
+<figcaption>Blue arrows are the unchanged signal wires; the arrowhead points the way the signal travels. <b style="color:var(--new)">Green</b> is new: the watch talks Bluetooth to the ESP32, and one wire carries the readings into Uno D0. <b style="color:var(--old)">Red dashed</b> is the old pulse sensor, now optional. Power and ground for each part come from the breadboard rails.</figcaption>
+</figure>
+
+<h2>2. Power rails <span class="tag t-same">NO CHANGE</span><span class="prog" data-g="pw"></span></h2>
+<table data-g="pw"><tr><th></th><th>From</th><th>To</th><th>Notes</th></tr>
+<tr><td class="ck"><input type="checkbox"></td><td><span class="w r5"></span>Uno <b>5V</b></td><td>Breadboard <b>5V rail</b> (+)</td><td>Red wire</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td><span class="w r33"></span>Uno <b>3.3V</b></td><td>Breadboard <b>3.3V rail</b> (second + rail)</td><td>Orange wire. Label this rail so nobody mixes it up with 5V.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td><span class="w rg"></span>Uno <b>GND</b></td><td>Both − rails</td><td>Jumper the two − rails together.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Power bank USB</td><td>Switch → USB cable → Uno USB port</td><td>Use the Uno's USB port, not VIN.</td></tr>
+</table>
+
+<h2>3. Screen and 74VHC86 <span class="tag t-same">NO CHANGE</span><span class="prog" data-g="tft"></span></h2>
+<p>This is the wiring now on the breadboard, verified on 2026-11-19 (screen test passed). Any gate can carry any signal; the assignment below is a suggestion, so match it to how yours is wired.</p>
+<figure>
+<svg viewBox="0 0 780 320" role="img" aria-label="74VHC86 pinout: each Uno pin goes into an A input, each B input goes to GND, and the Y output goes to the screen. VCC pin 14 to 3.3 V, GND pin 7."><g font-size="13" font-family="system-ui,sans-serif" fill="currentColor"><rect x="310" y="20" width="160" height="250" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M375,20 a15,15 0 0 0 30,0" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="355" cy="30" r="4"/><text x="390" y="300" text-anchor="middle" font-weight="700">74VHC86 (top view, notch up)</text>
+<text x="322" y="49">1 1A</text><line x1="300" y1="45" x2="170" y2="45" stroke="var(--sig)" stroke-width="2.5"/><text x="160" y="49" text-anchor="end" fill="var(--sig)">Uno D13</text>
+<text x="322" y="83">2 1B</text><line x1="300" y1="79" x2="170" y2="79" stroke="var(--gnd)" stroke-width="2.5"/><text x="160" y="83" text-anchor="end" fill="var(--gnd)">GND</text>
+<text x="322" y="117">3 1Y</text><line x1="300" y1="113" x2="170" y2="113" stroke="var(--acc)" stroke-width="2.5"/><text x="160" y="117" text-anchor="end" fill="var(--acc)">screen SCK</text>
+<text x="322" y="151">4 2A</text><line x1="300" y1="147" x2="170" y2="147" stroke="var(--sig)" stroke-width="2.5"/><text x="160" y="151" text-anchor="end" fill="var(--sig)">Uno D11</text>
+<text x="322" y="185">5 2B</text><line x1="300" y1="181" x2="170" y2="181" stroke="var(--gnd)" stroke-width="2.5"/><text x="160" y="185" text-anchor="end" fill="var(--gnd)">GND</text>
+<text x="322" y="219">6 2Y</text><line x1="300" y1="215" x2="170" y2="215" stroke="var(--acc)" stroke-width="2.5"/><text x="160" y="219" text-anchor="end" fill="var(--acc)">screen SDI (MOSI)</text>
+<text x="322" y="253">7 GND</text><line x1="300" y1="249" x2="170" y2="249" stroke="var(--gnd)" stroke-width="2.5"/><text x="160" y="253" text-anchor="end" fill="var(--gnd)">GND rail</text>
+<text x="458" y="49" text-anchor="end">VCC 14</text><line x1="480" y1="45" x2="610" y2="45" stroke="var(--p33)" stroke-width="2.5"/><text x="620" y="49" fill="var(--p33)">3.3V rail (+ 0.1 µF to GND)</text>
+<text x="458" y="83" text-anchor="end">4B 13</text><line x1="480" y1="79" x2="610" y2="79" stroke="var(--gnd)" stroke-width="2.5"/><text x="620" y="83" fill="var(--gnd)">GND</text>
+<text x="458" y="117" text-anchor="end">4A 12</text><line x1="480" y1="113" x2="610" y2="113" stroke="var(--sig)" stroke-width="2.5"/><text x="620" y="117" fill="var(--sig)">Uno D9</text>
+<text x="458" y="151" text-anchor="end">4Y 11</text><line x1="480" y1="147" x2="610" y2="147" stroke="var(--acc)" stroke-width="2.5"/><text x="620" y="151" fill="var(--acc)">screen DC</text>
+<text x="458" y="185" text-anchor="end">3B 10</text><line x1="480" y1="181" x2="610" y2="181" stroke="var(--gnd)" stroke-width="2.5"/><text x="620" y="185" fill="var(--gnd)">GND</text>
+<text x="458" y="219" text-anchor="end">3A 9</text><line x1="480" y1="215" x2="610" y2="215" stroke="var(--sig)" stroke-width="2.5"/><text x="620" y="219" fill="var(--sig)">Uno D10</text>
+<text x="458" y="253" text-anchor="end">3Y 8</text><line x1="480" y1="249" x2="610" y2="249" stroke="var(--acc)" stroke-width="2.5"/><text x="620" y="253" fill="var(--acc)">screen CS</text>
+</g></svg>
+<figcaption>XOR with one input tied to GND passes the other input straight through, so each gate is a 5 V → 3.3 V buffer. Uno pins go into <b>A</b> inputs (blue), every <b>B</b> input goes to GND, and the <b>Y</b> outputs go to the screen (purple). Must be a chip marked <b>74VHC86 / 74AHC86</b>; plain 74HC86 does not accept 5 V inputs at 3.3 V.</figcaption>
+</figure>
+<table data-g="tft"><tr><th></th><th>Screen pin</th><th>Goes to</th><th>Notes</th></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>74VHC86 pin 14 (VCC)</td><td><span class="w r33"></span>3.3V rail</td><td>Must be 3.3 V. This sets the output level. A 0.1 µF capacitor from pin 14 to pin 7 is recommended.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>74VHC86 pin 7 (GND)</td><td><span class="w rg"></span>GND rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>74VHC86 pins 2, 5, 10, 13 (B inputs)</td><td><span class="w rg"></span>GND rail</td><td>All four. A floating B input makes that gate unpredictable.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>SCK</b></td><td>pin 3 (1Y) ← pin 1 (1A) ← <b>Uno D13</b></td><td>SPI clock</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>SDI (MOSI)</b></td><td>pin 6 (2Y) ← pin 4 (2A) ← <b>Uno D11</b></td><td>Data to screen</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>CS</b></td><td>pin 8 (3Y) ← pin 9 (3A) ← <b>Uno D10</b></td><td>Chip select</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>DC</b> (or D/C, RS)</td><td>pin 11 (4Y) ← pin 12 (4A) ← <b>Uno D9</b></td><td>Data / command</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>RESET</b></td><td><b>Uno D8</b> → 1 kΩ → junction → screen RESET; junction → 2 kΩ → GND</td><td>The chip has only 4 gates, so RESET uses a resistor divider (5 V × 2k/3k ≈ 3.3 V). Two 1 kΩ in series make the 2 kΩ. No direct D8 → RESET wire.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>SDO (MISO)</b></td><td><b>Uno D12</b>, direct</td><td>Screen → Uno only, so no shifter needed.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>VCC</b></td><td><span class="w r5"></span>5V rail</td><td>Board has its own 3.3 V regulator (unless jumper J1 is soldered shut).</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>LED</b></td><td><span class="w r33"></span>3.3V rail</td><td>Backlight</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Screen <b>GND</b></td><td><span class="w rg"></span>GND rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>T_CLK, T_CS, T_DIN, T_DO, T_IRQ, SD_*</td><td>Nothing</td><td>Touch and SD card on the screen are not used.</td></tr>
+</table>
+
+<h2>4. DFPlayer Mini and speaker <span class="tag t-same">NO CHANGE</span><span class="prog" data-g="df"></span></h2>
+<div class="note">With the microSD slot facing up and away from you, the left column is pins 1–8 from top: <b>VCC, RX, TX, DAC_R, DAC_L, SPK_1, GND, SPK_2</b>. Check against the labels on your board.</div>
+<table data-g="df"><tr><th></th><th>DFPlayer pin</th><th>Goes to</th><th>Notes</th></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>1 <b>VCC</b></td><td><span class="w r5"></span>5V rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>7 <b>GND</b></td><td><span class="w rg"></span>GND rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>470 µF capacitor</td><td>Long leg (+) → VCC, striped leg (−) → GND</td><td>Right next to the module.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>3 <b>TX</b></td><td><span class="w rs"></span><b>Uno D2</b></td><td>Direct wire</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>2 <b>RX</b></td><td><span class="w rs"></span>1 kΩ resistor → <b>Uno D3</b></td><td>Resistor in series (brown-black-red).</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>6 <b>SPK_1</b></td><td>Speaker +</td><td>Speaker goes straight to the module, never to GND.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>8 <b>SPK_2</b></td><td>Speaker −</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>microSD card</td><td>FAT32, folder <code>/mp3/</code>, files <code>0001.mp3</code> to <code>0005.mp3</code></td><td>Reveal, flag, explosion, lose, win</td></tr>
+</table>
+
+<h2>5. Controls <span class="tag t-same">NO CHANGE</span><span class="prog" data-g="in"></span></h2>
+<table data-g="in"><tr><th></th><th>Part pin</th><th>Goes to</th><th>Notes</th></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Joystick <b>GND</b></td><td><span class="w rg"></span>GND rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Joystick <b>+5V</b></td><td><span class="w r5"></span>5V rail</td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Joystick <b>VRx</b></td><td><span class="w rs"></span><b>Uno A0</b></td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Joystick <b>VRy</b></td><td><span class="w rs"></span><b>Uno A1</b></td><td></td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Joystick <b>SW</b></td><td><span class="w rs"></span><b>Uno D4</b></td><td>Internal pull-up, no resistor.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Flag button, leg 1</td><td><span class="w rs"></span><b>Uno D5</b></td><td>On a 4-leg button use two <b>diagonal</b> legs.</td></tr>
+<tr><td class="ck"><input type="checkbox"></td><td>Flag button, diagonal leg</td><td><span class="w rg"></span>GND rail</td><td>Internal pull-up, no resistor.</td></tr>
+</table>
+
+<h2>6. Heart rate: Garmin + ESP32 bridge <span class="tag t-new">CHANGED</span><span class="prog" data-g="hr"></span></h2>
+<div class="note"><b>ESP32 DevKit V1 (30-pin DOIT board):</b> GPIO17 is the pin printed <b>TX2</b> (sometimes <b>D17</b>). There are GND pins on both sides; any of them works.</div>
+<table data-g="hr"><tr><th></th><th>Part pin</th><th>Goes to</th><th>Notes</th></tr>
+<tr class="chg-new"><td class="ck"><input type="checkbox"></td><td><span class="tag t-new">NEW</span>ESP32 <b>micro-USB</b></td><td>Its own USB cable (laptop or a second power bank port)</td><td>Powers the ESP32. Do <b>not</b> also connect its 3.3V or VIN pin to the Uno's rails.</td></tr>
+<tr class="chg-new"><td class="ck"><input type="checkbox"></td><td><span class="tag t-new">NEW</span>ESP32 <b>GND</b></td><td><span class="w rg"></span>GND rail</td><td>Required. Without a shared ground the Uno reads garbage.</td></tr>
+<tr class="chg-new"><td class="ck"><input type="checkbox"></td><td><span class="tag t-new">NEW</span>ESP32 <b>GPIO17 (TX2)</b></td><td><span class="w rn"></span><b>Uno D0 (RX)</b></td><td>Direct wire, one way (ESP32 → Uno). The ESP32's 3.3 V high is enough for the Uno, so no shifter. <b>Pull this wire out of D0 before every Uno upload</b>, then put it back.</td></tr>
+<tr class="chg-new"><td class="ck"><input type="checkbox"></td><td><span class="tag t-new">NEW</span>Garmin Forerunner 265S</td><td>Hold UP → Settings → Sensors &amp; Accessories → Wrist Heart Rate → <b>Broadcast Heart Rate</b></td><td>No wire. Leave the broadcast screen open while playing; it drains the battery faster.</td></tr>
+<tr class="chg-old"><td class="ck"><input type="checkbox"></td><td><span class="tag t-old">REMOVE</span>Pulse sensor <b>S</b></td><td>Uno A2</td><td><span class="keep">Optional. Ignored with <code>HR_SOURCE_BLE 1</code>; leave it in if you may switch back.</span></td></tr>
+<tr class="chg-old"><td class="ck"><input type="checkbox"></td><td><span class="tag t-old">REMOVE</span>Pulse sensor <b>+</b></td><td>5V rail</td><td><span class="keep">Optional, same as above.</span></td></tr>
+<tr class="chg-old"><td class="ck"><input type="checkbox"></td><td><span class="tag t-old">REMOVE</span>Pulse sensor <b>−</b></td><td>GND rail</td><td><span class="keep">Optional, same as above.</span></td></tr>
+</table>
+
+<h2>7. Uno pin summary</h2>
+<table>
+<tr><th>Uno pin</th><th>Connects to</th><th>Uno pin</th><th>Connects to</th></tr>
+<tr class="chg-new"><td><b>D0 (RX)</b></td><td><span class="tag t-new">NEW</span>ESP32 GPIO17 (TX2). Unplug for uploads.</td><td>D11</td><td>74VHC86 pin 4 → screen SDI</td></tr>
+<tr><td>D1 (TX)</td><td>Nothing (USB serial debug)</td><td>D12</td><td>Screen SDO (direct)</td></tr>
+<tr><td>D2</td><td>DFPlayer TX</td><td>D13</td><td>74VHC86 pin 1 → screen SCK</td></tr>
+<tr><td>D3</td><td>1 kΩ → DFPlayer RX</td><td>A0 / A1</td><td>Joystick VRx / VRy</td></tr>
+<tr><td>D4</td><td>Joystick SW</td><td class="chg-old" style="background:color-mix(in srgb,var(--old) 10%,var(--card))">A2</td><td style="background:color-mix(in srgb,var(--old) 10%,var(--card))"><span class="tag t-old">FREED</span>Pulse sensor S (optional now)</td></tr>
+<tr><td>D5</td><td>Flag button</td><td>A3</td><td><b>Leave empty</b> (random seed)</td></tr>
+<tr><td>D8</td><td>1k/2k divider → screen RESET</td><td>Free</td><td>D6, D7, A4, A5</td></tr>
+<tr><td>D9</td><td>74VHC86 pin 12 → screen DC</td><td></td><td></td></tr>
+<tr><td>D10</td><td>74VHC86 pin 9 → screen CS</td><td></td><td></td></tr>
+</table>
+
+<h2>8. Check before powering on</h2>
+<ul>
+<li>Nothing from the 5V rail touches the 3.3V rail, and neither touches GND.</li>
+<li>74VHC86 notch faces the right way, pin 14 on 3.3 V, pin 7 and all four B inputs on GND.</li>
+<li>RESET goes through the divider, not straight from D8.</li>
+<li>ESP32 GND is on the GND rail; its 3.3V and VIN pins are <b>not</b> connected to anything.</li>
+<li>GPIO17 → D0 wire is <b>out</b> while uploading to the Uno, and back in afterwards.</li>
+<li><code>HR_SOURCE_BLE</code> in <code>include/config.h</code> is <code>1</code>, and the ESP32 has the bridge (<code>pio run -e esp32_hr -t upload</code>).</li>
+</ul>
+</main>
+<script>
+(function(){
+  var KEY='msw-wiring-garmin-v1',st={};
+  try{st=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  function upd(){document.querySelectorAll('table[data-g]').forEach(function(t){
+    var g=t.dataset.g,b=t.querySelectorAll('input'),n=0;b.forEach(function(x){if(x.checked)n++});
+    var s=document.querySelector('span.prog[data-g="'+g+'"]');if(s)s.textContent=n+' / '+b.length+' done';})}
+  document.querySelectorAll('table[data-g]').forEach(function(t){
+    t.querySelectorAll('input').forEach(function(x,i){
+      var id=t.dataset.g+i;x.checked=!!st[id];x.closest('tr').classList.toggle('done',x.checked);
+      x.addEventListener('change',function(){st[id]=x.checked;x.closest('tr').classList.toggle('done',x.checked);
+        try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}upd();});
+    });});
+  upd();
+})();
+</script>
+</body></html>

@@ -25,7 +25,7 @@
 
 // Heart timer
 #define CAL_MS 15000UL
-#define CAL_MIN_BEATS 10
+#define CAL_MIN_BEATS 6
 #define BEAT_AVG_N 8
 #define IBI_MIN_MS 300
 #define IBI_MAX_MS 1500
@@ -36,6 +36,17 @@
 #define T_MIN_MS 3000L
 #define T_SLOPE_MS_PER_BPM 200L
 #define FIXED_MOVE_MS 8000L
+
+// Heart-rate source.
+//   0 = analog pulse sensor on PIN_PULSE (PulseSensor Playground).
+//   1 = Garmin watch via the ESP32 bridge (src/stages/esp32_hr_bridge.cpp),
+//       which sends "HR <bpm>" lines into the Uno's D0 (RX). Unplug the
+//       bridge's wire from D0 while uploading to the Uno.
+#define HR_SOURCE_BLE 1
+#define HR_SERIAL_BAUD 115200   // Uno Serial and the bridge's output; must match
+#define BLE_CAL_MIN_READINGS 10 // watch readings (about 1 per second) needed in CAL_MS
+#define BLE_BPM_MIN 40          // readings outside this range count as "no signal"
+#define BLE_BPM_MAX 200
 
 // Audio
 #define DF_VOLUME 20          // 0-30; keep 18-22 while the DFPlayer runs off the Uno's 5 V

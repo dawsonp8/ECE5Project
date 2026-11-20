@@ -20,6 +20,7 @@ A handheld Minesweeper game for ECE 5, built on an Arduino Uno. The player moves
 | Flag push button | To GND, active-low | **5** |
 | Pulse sensor (Comimark analog clone) | Mounted face-up as a finger pad | Signal **A2** |
 | Power | Power bank → switch → Uno USB | |
+| *Optional:* ESP32 DevKit V1 heart-rate bridge | Reads a Garmin watch over Bluetooth LE and sends `HR <bpm>` lines (section 7.5). Own USB power, shared GND | Uno **D0 (RX)** ← ESP32 GPIO17 (TX2) |
 
 Free pins: 6, 7, A3, A4, A5. Leave **A3 unconnected**: it is read as a floating input to seed the random number generator.
 
@@ -164,6 +165,16 @@ Use `FIXED_MOVE_MS` (tunable, default **8000 ms**) when either:
 - during play, `heartValid()` is false (finger lifted, sensor noise). Switch back to the formula automatically once a valid average returns.
 
 The status bar shows `HR --` and a different color for the timer bar while in fallback, so the player knows.
+
+### 7.5 Optional heart-rate source: Garmin watch via ESP32 (`HR_SOURCE_BLE`)
+Added after the pulse sensor proved unreliable on fingertips. Selected with `HR_SOURCE_BLE 1` in `config.h`; `0` keeps sections 7.1–7.2 exactly as written.
+
+- **Watch:** a Garmin Forerunner 265S in *Broadcast Heart Rate* mode advertises the standard Bluetooth LE Heart Rate service (`0x180D`, measurement characteristic `0x2A37`).
+- **Bridge:** `src/stages/esp32_hr_bridge.cpp` on an ESP32 DevKit V1 (`pio run -e esp32_hr`, library `h2zero/NimBLE-Arduino`). It scans, connects, subscribes, and writes `HR <bpm>\n` to GPIO17 at `HR_SERIAL_BAUD` (115200) for each watch update (~1 Hz), and `HR 0\n` once a second while disconnected. Set `WATCH_NAME` in the sketch if other watches nearby broadcast too.
+- **Uno link:** hardware `Serial` RX on **D0**. Not a second SoftwareSerial: the DFPlayer's SoftwareSerial is read at init and only one SoftwareSerial can listen at a time. `Serial.print` debug output on D1 is unaffected. Unplug the bridge from D0 while uploading to the Uno.
+- **`heart.cpp` in BLE mode:** PulseSensor Playground is not compiled (frees Timer1 and A2). `heartUpdate()` reads `Serial` without blocking into a fixed 12-byte line buffer. A reading in `BLE_BPM_MIN`–`BLE_BPM_MAX` (40–200) is the current BPM (no 8-beat average; the watch already smooths). `HR 0`, an out-of-range value, or no reading for `HR_LOST_MS` → `heartValid() == false` → fixed-timer fallback (7.4).
+- **Calibration in BLE mode:** same 15 s window; `BPM_rest` = average of the watch readings; needs at least `BLE_CAL_MIN_READINGS` (10) readings.
+- Sections 7.3 and 7.4 are unchanged.
 
 ---
 
